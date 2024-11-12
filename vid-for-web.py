@@ -10,7 +10,7 @@ import logging
 logging.basicConfig(
     filename='app.log',
     filemode='a',
-    format='%(asctime)s %(levelname)s:%(message)s',
+    format='%(asctime)s %(levelname)s:%(message)s', 
     level=logging.DEBUG
 )
 
@@ -112,6 +112,11 @@ class App(tk.Tk):
         messagebox.showinfo("Reset", "Output directory has been reset to the default.")
 
     def on_script_selected(self, event):
+        """Handle script selection changes without affecting listbox selection."""
+        # Preserve current selection
+        selected_indices = self.file_listbox.curselection()
+        selected_files = [self.file_listbox.get(i) for i in selected_indices]
+
         # Clear previous option widgets
         for widget in self.options_frame.winfo_children():
             widget.destroy()
@@ -153,13 +158,29 @@ class App(tk.Tk):
                     self.option_widgets[option_key] = var
                 row += 1
 
+        # Restore previous selection
+        self.file_listbox.selection_clear(0, tk.END)
+        for idx, file in enumerate(self.file_listbox.get(0, tk.END)):
+            if file in selected_files:
+                self.file_listbox.selection_set(idx)
+
     def select_files(self):
         filetypes = [("Video Files", "*.mp4 *.avi *.mov *.webm *.gif *.webp"), ("All Files", "*.*")]
         selected_files = filedialog.askopenfilenames(title="Select Input Files", filetypes=filetypes)
+        
+        # Store the current size to determine newly added files
+        before_count = self.file_listbox.size()
+        
         for file in selected_files:
             if file not in self.file_listbox.get(0, tk.END):
                 self.file_listbox.insert(tk.END, file)
-
+        
+        after_count = self.file_listbox.size()
+        
+        # Auto-select the newly added files
+        for i in range(before_count, after_count):
+            self.file_listbox.selection_set(i)
+        
         if selected_files and not self.output_dir_set_manually:
             # Set output directory to the directory of the first selected file only if not set manually
             first_file = selected_files[0]
