@@ -1,0 +1,42 @@
+{
+    "scripts": [
+        {
+            "name": "GIF",
+            "command": "ffmpeg -i \"{input_file}\" -vf \"fps={fps},scale={scale},palettegen\" -y \"{palette_file}\" && ffmpeg -i \"{input_file}\" -i \"{palette_file}\" -filter_complex \"fps={fps},scale={scale}:flags=lanczos[x];[x][1:v]paletteuse\" \"{output_file}\"",
+            "options": {
+                "fps": [10, 15, 25],
+                "scale": ["320:-2", "480:-2", "720:-2"]
+            }
+        },
+        {
+            "name": "MP4",
+            "command": "ffmpeg -i \"{input_file}\" -vcodec libx264 -preset slow -crf {crf} -vf \"fps={fps},scale={scale}\" \"{output_file}\"",
+            "options": {
+                "crf": [23, 28, 32],
+                "fps": [24, 30, 60],
+                "scale": ["320:-2", "480:-2", "720:-2", "1080:-2"]
+            }
+        },
+        {
+            "name": "WEBM",
+            "command": "ffmpeg -i \"{input_file}\" -c:v libvpx-vp9 -b:v {bitrate} -crf {crf} -vf \"fps={fps},scale={scale}\" \"{output_file}\"",
+            "options": {
+                "crf": [30, 40, 50],
+                "bitrate": ["0", "1M", "2M"],
+                "fps": [24, 30, 60],
+                "scale": ["320:-2", "480:-2", "720:-2", "1080:-2"]
+            }
+        },
+        {
+            "name": "WEBP",
+            "command": "ffmpeg -i \"{input_file}\" -vf \"fps={fps},scale={scale}\" -c:v libwebp -lossless {lossless} -q:v {quality} -loop 0 -preset {preset} \"{output_file}\"",
+            "options": {
+                "fps": [10, 15, 25],
+                "scale": ["320:-2", "480:-2", "720:-2"],
+                "quality": [75, 85, 95],
+                "lossless": [0, 1],
+                "preset": ["default", "photo", "picture", "drawing", "icon", "text"]
+            }
+        }
+    ]
+}
